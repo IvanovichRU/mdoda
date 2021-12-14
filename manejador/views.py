@@ -1,5 +1,6 @@
 from django import template
 from django.http import HttpResponse
+from django.http.response import HttpResponseRedirect
 from manejador.Colecciones.Tema import Tema
 from django.template import loader
 
@@ -16,3 +17,9 @@ def buscar_tema(request):
     else:
         contexto = {'temas': Tema.buscar(tema_a_buscar)}
     return HttpResponse(plantila.render(contexto, request))
+
+def agregar_tema(request):
+    tema_texto = request.POST['tema_a_agregar']
+    tema_a_agregar = Tema(tema_texto)
+    tema_a_agregar.guardar()
+    return HttpResponseRedirect('/')

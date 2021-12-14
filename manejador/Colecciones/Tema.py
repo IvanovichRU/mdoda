@@ -9,6 +9,9 @@ class Tema:
     def __str__(self) -> str:
         return self.tema
 
+    def guardar(self):
+        mongoDB.Temas.insert_one(self.__dict__)
+
     @staticmethod
     def todos():
         return [Tema(tema['tema']) for tema in mongoDB.Temas.find()]
