@@ -1,0 +1,14 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manejador</title>
+</head>
+<body>
+    <form action="buscar_tema" method="POST">
+        {% csrf_token %}
+        <label for="tema_a_buscar">Buscar tema:</label>
+        <input name="tema_a_buscar" id="tema_a_buscar">
+    </form>
+</body>
+</html>
