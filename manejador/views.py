@@ -1,6 +1,7 @@
 import json
 from django.http.response import JsonResponse
 from manejador.Colecciones.Usuario import Usuario
+from manejador.Colecciones.ObjetoDeAprendizaje import ObjetoDeAprendizaje
 
 # Create your views here.
 def vista_login(request):
@@ -17,5 +18,6 @@ def vista_login(request):
     })
 
 def buscar_objetos(request):
-    datos = json.loads(request.body)
-    return None
+    encontrados = ObjetoDeAprendizaje.buscar(request.GET['cadena_de_busqueda'])
+    encontrados_serializables = [encontrado.serializar_para_tabla() for encontrado in encontrados]
+    return JsonResponse({'objetos_encontrados': encontrados_serializables})

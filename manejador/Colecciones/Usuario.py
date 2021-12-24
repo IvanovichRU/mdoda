@@ -13,13 +13,26 @@ class Usuario:
     def __str__(self) -> str:
         return self.nombre + ' ' + self.apellidos
     
-    def __init__(self, nombre: str, apellidos: str, email: str, contraseña: str, tipo: str, usuario_id) -> None:
-        self.nombre = nombre
-        self. apellidos = apellidos
-        self.email = email
-        self.contraseña = contraseña
-        self.tipo = tipo
-        self.usuario_id = usuario_id
+    def __init__(self, nombre: str=None, apellidos: str=None, email: str=None, contraseña: str=None, tipo: str=None, usuario_id=None, mongo_id=None, mongo_tipo=None) -> None:
+        if mongo_id and mongo_tipo:
+            if mongo_tipo == 'administrador':
+                usuario_dict = mongoDB.Administradores.find_one({'_id': mongo_id})
+            if mongo_tipo == 'maestro':
+                usuario_dict = mongoDB.Maestros.find_one({'_id': mongo_id})
+            if mongo_tipo == 'alumno':
+                usuario_dict = mongoDB.Alumnos.find_one({'_id': mongo_id})
+            self.nombre = usuario_dict['nombre']
+            self.apellidos = usuario_dict['apellidos']
+            self.email = usuario_dict['email']
+            self.contraseña = fernet.decrypt(usuario_dict['contraseña']).decode()
+            self.usuario_id = str(mongo_id)
+        else:
+            self.nombre = nombre
+            self. apellidos = apellidos
+            self.email = email
+            self.contraseña = contraseña
+            self.tipo = tipo
+            self.usuario_id = usuario_id
 
     @staticmethod
     def guardar(usuario: dict):
