@@ -127,13 +127,13 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-MONGO_URI = 'mongodb://localhost:27017'
+MONGO_URI = 'mongodb+srv://MDODA:PIOLIN@cluster0.zekiv.mongodb.net/BaseDeConocimientos?retryWrites=true&w=majority'
 
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000'
 ]
 
-CSRF_TRUSTED_ORIGINS = ['*']
+CSRF_TRUSTED_ORIGINS = ['http://localhost:3000']
 CSRF_USE_SESSIONS = False
 CSRF_COOKIE_HTTPONLY = False
 CORS_ALLOW_CREDENTIALS = True

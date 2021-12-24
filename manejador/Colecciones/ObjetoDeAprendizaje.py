@@ -35,7 +35,7 @@ class ObjetoDeAprendizaje:
     def __init__(
         self, nombre=None, nivel=None,
         granularidad=None, perfil=None,
-        objetivo_de_aprendizaje=None,
+        objetivo_de_aprendizaje=None, descripcion=None,
         temas=None, autor=None, materiales=None, dict_mongo=None) -> None:
 
         if (dict_mongo):
@@ -58,6 +58,7 @@ class ObjetoDeAprendizaje:
             self.temas = temas
             self.autor = autor
             self.materiales = materiales
+            self.descripcion = descripcion
 
     @staticmethod
     def buscar(cadena_busqueda: str):
@@ -93,3 +94,17 @@ class ObjetoDeAprendizaje:
             'temas': self.temas
         }
         return objeto
+    
+    def guardar(self):
+        insertado = mongoDB.ObjetosDeAprendizaje.insert_one({
+            'NombreDelObjeto': self.nombre,
+            'Nivel': self.nivel,
+            'Granularidad': self.granularidad,
+            'Perfil': self.perfil,
+            'ObjetivoDeAprendizaje': self.objetivo_de_aprendizaje,
+            'Temas': self.temas,
+            'Autor': self.autor,
+            'Materiales': self.materiales,
+            'Descripcion': self.descripcion
+         })
+        return insertado.inserted_id
