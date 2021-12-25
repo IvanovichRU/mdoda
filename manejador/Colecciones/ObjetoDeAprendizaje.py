@@ -21,7 +21,7 @@ class Granularidad(Enum):
     SUBTEMA = 4
 
 class ObjetoDeAprendizaje:
-    id: str
+    _id: str
     nombre: str
     descripcion: str
     nivel: str
@@ -39,18 +39,9 @@ class ObjetoDeAprendizaje:
         temas=None, autor=None, materiales=None, dict_mongo=None) -> None:
 
         if (dict_mongo):
-            self.id = dict_mongo['_id']
-            self.nombre = dict_mongo['NombreDelObjeto']
-            self.nivel = dict_mongo['Nivel']
-            self.granularidad = dict_mongo['Granularidad']
-            self.perfil = dict_mongo['Perfil']
-            self.objetivo_de_aprendizaje = dict_mongo['ObjetivoDeAprendizaje']
-            self.temas = dict_mongo['Temas']
-            self.autor = Usuario(mongo_id=dict_mongo['Autor']['id'], mongo_tipo=dict_mongo['Autor']['tipo'])
-            self.materiales = dict_mongo['Materiales']
-            self.descripcion = dict_mongo['Descripcion']
+            self.__dict__=dict_mongo
         else:
-            self.id = None
+            self._id = None
             self.nombre = nombre
             self.nivel = nivel
             self.granularidad = granularidad
@@ -89,7 +80,7 @@ class ObjetoDeAprendizaje:
 
     def serializar_para_tabla(self):
         objeto = {
-            'id': str(self.id),
+            'id': str(self._id),
             'nombre': self.nombre,
             'descripcion': self.descripcion,
             'temas': self.temas
@@ -98,17 +89,19 @@ class ObjetoDeAprendizaje:
     
     def guardar(self):
         dict_para_mongo = self.__dict__
-        dict_para_mongo.pop('id')
-        self.id = mongoDB.ObjetosDeAprendizaje.insert_one(dict_para_mongo).inserted_id
+        dict_para_mongo.pop('_id')
+        self._id = mongoDB.ObjetosDeAprendizaje.insert_one(dict_para_mongo).inserted_id
         for tema_actual in self.temas:
             encontrado = mongoDB.Temas.find_one({'tema': tema_actual})
+            print(encontrado)
             if encontrado is None:
                 nuevo_tema = Tema(tema_actual, [])
-                nuevo_tema.agregar_id_objeto(self.id)
+                nuevo_tema.agregar_id_objeto(self._id)
                 print(nuevo_tema.objetos)
                 nuevo_tema.guardar()
             else:
-                tema_existente = Tema(id_mongo=tema_actual['_id']) # TODO: Arreglar esto, no seas pendejo.
-                if str(self.id) not in [str(id_objeto) for id_objeto in tema_existente.objetos]:
-                    tema_existente.agregar_id_objeto(self.id)
+                tema_existente = Tema(id_mongo=encontrado['_id']) # TODO: Arreglar esto, no seas pendejo.
+                print(tema_existente.__dict__)
+                if str(self._id) not in [str(id_objeto) for id_objeto in tema_existente.objetos]:
+                    tema_existente.agregar_id_objeto(self._id)
                     tema_existente.actualizar()

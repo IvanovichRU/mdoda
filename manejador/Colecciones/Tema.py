@@ -2,7 +2,7 @@ from bson.objectid import ObjectId
 from mdoda.conexion_mongo import mongoDB
 
 class Tema:
-    id: ObjectId
+    _id: ObjectId
     tema: str
     objetos: 'list[ObjectId]'
 
@@ -10,11 +10,11 @@ class Tema:
         if 'id_mongo' in kwargs:
             dict_tema = mongoDB.Temas.find_one({'_id': kwargs['id_mongo']})
             if dict_tema:
-                self.id = dict_tema['_id']
+                self._id = dict_tema['_id']
                 self.tema = dict_tema['tema']
                 self.objetos = dict_tema['objetos']
         else:
-            self.id = None
+            self._id = None
             self.tema = tema
             self.objetos = objetos
 
@@ -23,14 +23,13 @@ class Tema:
 
     def guardar(self):
         dict_para_mongo = self.__dict__
-        dict_para_mongo.pop('id')
-        self.id = mongoDB.Temas.insert_one(dict_para_mongo).inserted_id
+        dict_para_mongo.pop('_id')
+        self._id = mongoDB.Temas.insert_one(dict_para_mongo).inserted_id
 
     def actualizar(self):
-        if self.id:
+        if self._id:
             dict_para_mongo = self.__dict__
-            dict_para_mongo.pop('id')
-            mongoDB.Temas.replace_one({'_id': self.id}, dict_para_mongo)
+            mongoDB.Temas.replace_one({'_id': self._id}, {"tema":dict_para_mongo["tema"], "objetos":dict_para_mongo["objetos"]})
 
     def agregar_id_objeto(self, id_objeto: ObjectId):
         self.objetos.append(id_objeto)
