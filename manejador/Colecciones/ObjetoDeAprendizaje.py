@@ -28,7 +28,7 @@ class ObjetoDeAprendizaje:
     granularidad: int
     perfil: str
     objetivo_de_aprendizaje: str
-    temas: 'list[Tema]'
+    temas: 'list[str]'
     autor: Usuario
     materiales: 'list[Material]'
 
@@ -50,6 +50,7 @@ class ObjetoDeAprendizaje:
             self.materiales = dict_mongo['Materiales']
             self.descripcion = dict_mongo['Descripcion']
         else:
+            self.id = None
             self.nombre = nombre
             self.nivel = nivel
             self.granularidad = granularidad
@@ -96,15 +97,18 @@ class ObjetoDeAprendizaje:
         return objeto
     
     def guardar(self):
-        insertado = mongoDB.ObjetosDeAprendizaje.insert_one({
-            'NombreDelObjeto': self.nombre,
-            'Nivel': self.nivel,
-            'Granularidad': self.granularidad,
-            'Perfil': self.perfil,
-            'ObjetivoDeAprendizaje': self.objetivo_de_aprendizaje,
-            'Temas': self.temas,
-            'Autor': self.autor,
-            'Materiales': self.materiales,
-            'Descripcion': self.descripcion
-         })
-        return insertado.inserted_id
+        dict_para_mongo = self.__dict__
+        dict_para_mongo.pop('id')
+        self.id = mongoDB.ObjetosDeAprendizaje.insert_one(dict_para_mongo).inserted_id
+        for tema_actual in self.temas:
+            encontrado = mongoDB.Temas.find_one({'tema': tema_actual})
+            if encontrado is None:
+                nuevo_tema = Tema(tema_actual, [])
+                nuevo_tema.agregar_id_objeto(self.id)
+                print(nuevo_tema.objetos)
+                nuevo_tema.guardar()
+            else:
+                tema_existente = Tema(id_mongo=tema_actual['_id']) # TODO: Arreglar esto, no seas pendejo.
+                if str(self.id) not in [str(id_objeto) for id_objeto in tema_existente.objetos]:
+                    tema_existente.agregar_id_objeto(self.id)
+                    tema_existente.actualizar()

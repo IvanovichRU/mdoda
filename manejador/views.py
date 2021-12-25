@@ -1,5 +1,4 @@
 import json
-from django.views.decorators.csrf import csrf_exempt
 from django.http.response import HttpResponse, JsonResponse
 from manejador.Colecciones.Usuario import Usuario
 from manejador.Colecciones.ObjetoDeAprendizaje import ObjetoDeAprendizaje
@@ -32,7 +31,7 @@ def registrar_objeto(request):
         granularidad=datos_objeto["granularidad_objeto"],
         perfil=datos_objeto["perfil_objeto"],
         objetivo_de_aprendizaje=datos_objeto["objetivo_objeto"],
-        temas=datos_objeto["temas"],
+        temas=[tema.lower() for tema in datos_objeto["temas"]],
         materiales=datos_objeto["materiales"],
         descripcion=datos_objeto["desc_objeto"]
     )
