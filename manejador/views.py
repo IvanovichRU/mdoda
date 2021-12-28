@@ -7,16 +7,28 @@ from django.template import loader
 # Create your views here.
 def vista_login(request):
     datos = json.loads(request.body)
-    email = datos['email']
-    contraseña = datos['contraseña']
-    usuario = Usuario.buscar(email, contraseña)
-    return JsonResponse({
-        'nombre': usuario.nombre,
-        'apellidos': usuario.apellidos,
-        'email': usuario.email,
-        'tipo': usuario.tipo,
-        'id': str(usuario.usuario_id)
-    })
+    if 'token_sesion' in datos:
+        usuario = Usuario.recuperar_sesion(datos['token_sesion'])
+        if usuario is not None:
+            dict_a_enviar = usuario.__dict__
+            dict_a_enviar.pop('contraseña')
+            dict_a_enviar['_id'] = str(dict_a_enviar['_id'])
+            return JsonResponse ({'Usuario': dict_a_enviar})
+    elif 'email' in datos and 'contraseña' in datos:
+        email = datos['email']
+        contraseña = datos['contraseña']
+        usuario = Usuario.buscar(email=email)
+    if len(usuario) > 1:
+        return JsonResponse({'Mensaje': 'Error: Múltiples usuarios registrados al mismo correo.'})
+    elif len(usuario) < 1:
+        return JsonResponse({'Mensaje': 'Error: Ningún usuario encontrado con el email proporcionado.'})
+    else:
+        usuario = usuario[0]
+        if usuario.autenticar(contraseña):
+            dict_a_enviar = usuario.__dict__
+            dict_a_enviar.pop('contraseña')
+            dict_a_enviar['_id'] = str(dict_a_enviar['_id'])
+            return JsonResponse({'Usuario': dict_a_enviar, 'token_sesion': usuario.crear_sesion()})
 
 def buscar_objetos(request):
     encontrados = ObjetoDeAprendizaje.buscar(request.GET['cadena_de_busqueda'])
