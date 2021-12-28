@@ -95,12 +95,16 @@ class Usuario:
 
     @staticmethod
     def recuperar_sesion(token: str) -> 'Usuario':
-        sesion = mongoDB.Sesiones.find_one({'_id': token})
+        sesion = mongoDB.Sesiones.find_one({'_id': ObjectId(token)})
         if sesion is not None:
             if sesion['tipo'] == 'Administrador':
-                return Usuario(mongoDB.Administradores.find_one({'_id': sesion['usuario']}))
+                dict_usuario = mongoDB.Administradores.find_one({'_id': ObjectId(sesion['usuario'])})
+                dict_usuario['tipo'] = 'Administrador'
+                return Usuario(dict_usuario)
             else:
-                return Usuario(mongoDB.Maestros.find_one({'_id': sesion['usuario']}))
+                dict_usuario = mongoDB.Maestros.find_one({'_id': ObjectId(sesion['usuario'])})
+                dict_usuario['tipo'] = 'Maestro'
+                return Usuario(dict_usuario)
         else:
             return None
 

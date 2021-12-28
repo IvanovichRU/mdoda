@@ -28,7 +28,10 @@ def vista_login(request):
             dict_a_enviar = usuario.__dict__
             dict_a_enviar.pop('contraseña')
             dict_a_enviar['_id'] = str(dict_a_enviar['_id'])
-            return JsonResponse({'Usuario': dict_a_enviar, 'token_sesion': usuario.crear_sesion()})
+            token_sesion = str(usuario.crear_sesion())
+            respuesta = JsonResponse({'Usuario': dict_a_enviar, 'token_sesion': token_sesion})
+            # respuesta.set_cookie('token_sesion', )
+            return respuesta
 
 def buscar_objetos(request):
     encontrados = ObjetoDeAprendizaje.buscar(request.GET['cadena_de_busqueda'])
