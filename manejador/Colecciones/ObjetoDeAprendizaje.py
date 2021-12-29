@@ -51,6 +51,28 @@ class ObjetoDeAprendizaje:
             self.autor = autor
             self.materiales = materiales
             self.descripcion = descripcion
+    
+    def guardar(self):
+        dict_para_mongo = self.__dict__
+        self._id = mongoDB.ObjetosDeAprendizaje.insert_one(dict_para_mongo).inserted_id
+        for tema_actual in self.temas:
+            encontrado = mongoDB.Temas.find_one({'tema': tema_actual})
+            print(encontrado)
+            if encontrado is None:
+                nuevo_tema = Tema(tema_actual, [])
+                nuevo_tema.agregar_id_objeto(self._id)
+                print(nuevo_tema.objetos)
+                nuevo_tema.guardar()
+            else:
+                tema_existente = Tema(id_mongo=encontrado['_id'])
+                print(tema_existente.__dict__)
+                if str(self._id) not in [str(id_objeto) for id_objeto in tema_existente.objetos]:
+                    tema_existente.agregar_id_objeto(self._id)
+                    tema_existente.actualizar()
+
+    def actualizar(self, dict_cambios: dict):
+        dict_nuevo = mongoDB.ObjetosDeAprendizaje.replace_one({'_id': self._id}, dict_cambios)
+        self.__dict__ = dict_nuevo
 
     @staticmethod
     def buscar(cadena_busqueda: str):
@@ -86,22 +108,3 @@ class ObjetoDeAprendizaje:
             'temas': self.temas
         }
         return objeto
-    
-    def guardar(self):
-        dict_para_mongo = self.__dict__
-        dict_para_mongo.pop('_id')
-        self._id = mongoDB.ObjetosDeAprendizaje.insert_one(dict_para_mongo).inserted_id
-        for tema_actual in self.temas:
-            encontrado = mongoDB.Temas.find_one({'tema': tema_actual})
-            print(encontrado)
-            if encontrado is None:
-                nuevo_tema = Tema(tema_actual, [])
-                nuevo_tema.agregar_id_objeto(self._id)
-                print(nuevo_tema.objetos)
-                nuevo_tema.guardar()
-            else:
-                tema_existente = Tema(id_mongo=encontrado['_id']) # TODO: Arreglar esto, no seas pendejo.
-                print(tema_existente.__dict__)
-                if str(self._id) not in [str(id_objeto) for id_objeto in tema_existente.objetos]:
-                    tema_existente.agregar_id_objeto(self._id)
-                    tema_existente.actualizar()

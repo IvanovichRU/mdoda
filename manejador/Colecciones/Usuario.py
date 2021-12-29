@@ -1,5 +1,4 @@
 from bson.objectid import ObjectId
-from pymongo.common import UNAUTHORIZED_CODES
 from mdoda.conexion_mongo import mongoDB
 from cryptography.fernet import Fernet
 
@@ -50,6 +49,9 @@ class Usuario:
             return True
         else:
             return False
+
+    def crear_sesion(self) -> ObjectId:
+        return mongoDB.Sesiones.insert_one({'usuario': self._id, 'tipo': self.tipo}).inserted_id
 
     @staticmethod
     def buscar(**kwargs) -> 'list[Usuario] | Usuario | None':
@@ -107,6 +109,3 @@ class Usuario:
                 return Usuario(dict_usuario)
         else:
             return None
-
-    def crear_sesion(self) -> ObjectId:
-        return mongoDB.Sesiones.insert_one({'usuario': self._id, 'tipo': self.tipo}).inserted_id

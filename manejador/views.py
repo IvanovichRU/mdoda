@@ -28,9 +28,11 @@ def vista_login(request):
             dict_a_enviar = usuario.__dict__
             dict_a_enviar.pop('contraseña')
             dict_a_enviar['_id'] = str(dict_a_enviar['_id'])
-            token_sesion = str(usuario.crear_sesion())
+            if datos['recordar'] == True:
+                token_sesion = str(usuario.crear_sesion())
+            else:
+                token_sesion = None
             respuesta = JsonResponse({'Usuario': dict_a_enviar, 'token_sesion': token_sesion})
-            # respuesta.set_cookie('token_sesion', )
             return respuesta
 
 def buscar_objetos(request):
@@ -39,17 +41,19 @@ def buscar_objetos(request):
     return JsonResponse({'objetos_encontrados': encontrados_serializables})
 
 def registrar_objeto(request):
-    datos_objeto = json.loads(request.body)
-    objeto = ObjetoDeAprendizaje(
-        nombre=datos_objeto["nombre_objeto"],
-        nivel=datos_objeto["nivel_objeto"],
-        granularidad=datos_objeto["granularidad_objeto"],
-        perfil=datos_objeto["perfil_objeto"],
-        objetivo_de_aprendizaje=datos_objeto["objetivo_objeto"],
-        temas=[tema.lower() for tema in datos_objeto["temas"]],
-        materiales=datos_objeto["materiales"],
-        descripcion=datos_objeto["desc_objeto"]
-    )
+    datos = json.loads(request.body)
+    usuario = Usuario(datos['usuario'])
+    objeto = ObjetoDeAprendizaje(datos['objeto'])
+    # objeto = ObjetoDeAprendizaje(
+    #     nombre=datos["nombre_objeto"],
+    #     nivel=datos["nivel_objeto"],
+    #     granularidad=datos["granularidad_objeto"],
+    #     perfil=datos["perfil_objeto"],
+    #     objetivo_de_aprendizaje=datos["objetivo_objeto"],
+    #     temas=[tema.lower() for tema in datos["temas"]],
+    #     materiales=datos["materiales"],
+    #     descripcion=datos["desc_objeto"]
+    # )
     objeto.guardar()
     return JsonResponse({'Mensaje': "Exito"})
 
