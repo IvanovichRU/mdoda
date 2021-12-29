@@ -15,18 +15,29 @@ class Usuario:
     def __str__(self) -> str:
         return self.nombre + ' ' + self.apellidos
     
-    def __init__(self, dict_mongo: dict=None):
+    def __init__(self, dict_mongo: dict=None, **kwargs):
         '''
         Un objeto `Usuario` acepta un diccionario extraido desde mongoDB o
         creado manualmente, con los atributos: `nombre`, `apellidos`, `email`,
         `tipo` y `contraseña`. Se pueden modificar posteriormente mediante `kwargs`.
         '''
-        self._id = dict_mongo['_id'] if '_id' in dict_mongo else None
-        self.nombre = dict_mongo['nombre']
-        self.apellidos = dict_mongo['apellidos']
-        self.email= dict_mongo['email']
-        self.tipo = dict_mongo['tipo']
-        self.contraseña = dict_mongo['contraseña']
+        if 'id_mongo' in kwargs and 'tipo' in kwargs:
+            if kwargs['tipo'] == 'Administrador':
+                self.__dict__ = mongoDB.Administradores.find_one({'_id':ObjectId(kwargs['id_mongo'])})
+                self.tipo = 'Administrador'
+            elif kwargs['tipo'] == 'Maestro':
+                self.__dict__ = mongoDB.Maestros.find_one({'_id':ObjectId(kwargs['id_mongo'])})
+                self.tipo = 'Maestro'
+            self.objetos = len([objeto for objeto in mongoDB.ObjetosDeAprendizaje.find({'autor':self._id})])
+            print(self.objetos)
+        else:
+            self._id = dict_mongo['_id'] if '_id' in dict_mongo else None
+            self.nombre = dict_mongo['nombre']
+            self.apellidos = dict_mongo['apellidos']
+            self.email= dict_mongo['email']
+            self.tipo = dict_mongo['tipo']
+            self.contraseña = dict_mongo['contraseña']
+            self.objetos = len([objeto for objeto in mongoDB.ObjetosDeAprendizaje.find({'autor':self._id})])
 
     def guardar(self):
         if self.tipo == 'Administrador':

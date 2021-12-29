@@ -36,10 +36,10 @@ class ObjetoDeAprendizaje:
         self, nombre=None, nivel=None,
         granularidad=None, perfil=None,
         objetivo_de_aprendizaje=None, descripcion=None,
-        temas=None, autor=None, materiales=None, dict_mongo=None) -> None:
+        temas=None, autor=None, materiales=None, **kwargs) -> None:
 
-        if (dict_mongo):
-            self.__dict__=dict_mongo
+        if 'dict_mongo' in kwargs:
+            self.__dict__ = kwargs['dict_mongo']
         else:
             self._id = None
             self.nombre = nombre

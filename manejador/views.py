@@ -1,4 +1,5 @@
 import json
+from bson.objectid import ObjectId
 from django.http.response import HttpResponse, JsonResponse
 from manejador.Colecciones.Usuario import Usuario
 from manejador.Colecciones.ObjetoDeAprendizaje import ObjetoDeAprendizaje
@@ -42,18 +43,8 @@ def buscar_objetos(request):
 
 def registrar_objeto(request):
     datos = json.loads(request.body)
-    usuario = Usuario(datos['usuario'])
-    objeto = ObjetoDeAprendizaje(datos['objeto'])
-    # objeto = ObjetoDeAprendizaje(
-    #     nombre=datos["nombre_objeto"],
-    #     nivel=datos["nivel_objeto"],
-    #     granularidad=datos["granularidad_objeto"],
-    #     perfil=datos["perfil_objeto"],
-    #     objetivo_de_aprendizaje=datos["objetivo_objeto"],
-    #     temas=[tema.lower() for tema in datos["temas"]],
-    #     materiales=datos["materiales"],
-    #     descripcion=datos["desc_objeto"]
-    # )
+    datos['autor'] = ObjectId(datos['autor'])
+    objeto = ObjetoDeAprendizaje(dict_mongo=datos)
     objeto.guardar()
     return JsonResponse({'Mensaje': "Exito"})
 
@@ -62,3 +53,10 @@ def arreglar_csrf(request):
     if request.method == "POST" :
         return HttpResponse(plantilla.render({}, request))
     return HttpResponse(plantilla.render({}, request))
+
+def refrescar_usuario(request):
+    datos = request.GET
+    dict_a_enviar = Usuario(id_mongo=datos['usuario_id'], tipo=datos['tipo']).__dict__
+    dict_a_enviar['_id'] = str(dict_a_enviar['_id'])
+    dict_a_enviar.pop('contraseña')
+    return JsonResponse({'usuario_actualizado':dict_a_enviar})
