@@ -48,6 +48,13 @@ def registrar_objeto(request):
     objeto.guardar()
     return JsonResponse({'Mensaje': "Exito"})
 
+def nuevo_usuario(request):
+    datos = json.loads(request.body)
+    usuario_nuevo = Usuario(datos)
+    usuario_nuevo.guardar()
+    return JsonResponse({'Mensaje': 'Nuevo usuario creado.'})
+
+
 def arreglar_csrf(request):
     plantilla=loader.get_template("manejador/arreglar_csrf.html")
     if request.method == "POST" :

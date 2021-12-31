@@ -45,11 +45,17 @@ class Usuario:
             dict_para_mongo['contraseña'] = fernet.encrypt(dict_para_mongo['contraseña'].encode())
             if dict_para_mongo['_id'] is None:
                 dict_para_mongo.pop('_id')
+            if 'objetos' in dict_para_mongo:
+                dict_para_mongo.pop('objetos')
             mongoDB.Administradores.insert_one(dict_para_mongo)
         elif self.tipo == 'Maestro':
             dict_para_mongo = self.__dict__
             dict_para_mongo.pop('tipo')
             dict_para_mongo['contraseña'] = fernet.encrypt(dict_para_mongo['contraseña'].encode())
+            if dict_para_mongo['_id'] is None:
+                dict_para_mongo.pop('_id')
+            if 'objetos' in dict_para_mongo:
+                dict_para_mongo.pop('objetos')
             mongoDB.Maestros.insert_one(self.__dict__)
         else:
             mongoDB.Alumnos.insert_one(self.__dict__)
