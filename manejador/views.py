@@ -54,6 +54,11 @@ def arreglar_csrf(request):
         return HttpResponse(plantilla.render({}, request))
     return HttpResponse(plantilla.render({}, request))
 
+def obtener_objetos(request):
+    datos = request.GET
+    objetos_del_usuario = ObjetoDeAprendizaje.buscar_objetos_de_usuario(datos['usuario_id'], serializar=True)
+    return JsonResponse({'objetos_encontrados': objetos_del_usuario})
+
 def refrescar_usuario(request):
     datos = request.GET
     dict_a_enviar = Usuario(id_mongo=datos['usuario_id'], tipo=datos['tipo']).__dict__

@@ -29,7 +29,6 @@ class Usuario:
                 self.__dict__ = mongoDB.Maestros.find_one({'_id':ObjectId(kwargs['id_mongo'])})
                 self.tipo = 'Maestro'
             self.objetos = len([objeto for objeto in mongoDB.ObjetosDeAprendizaje.find({'autor':self._id})])
-            print(self.objetos)
         else:
             self._id = dict_mongo['_id'] if '_id' in dict_mongo else None
             self.nombre = dict_mongo['nombre']

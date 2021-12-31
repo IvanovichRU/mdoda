@@ -1,3 +1,4 @@
+from bson.objectid import ObjectId
 from mdoda.conexion_mongo import mongoDB
 from mdoda.conexion_mongo import PREPOSICIONES, ARTICULOS
 
@@ -57,15 +58,12 @@ class ObjetoDeAprendizaje:
         self._id = mongoDB.ObjetosDeAprendizaje.insert_one(dict_para_mongo).inserted_id
         for tema_actual in self.temas:
             encontrado = mongoDB.Temas.find_one({'tema': tema_actual})
-            print(encontrado)
             if encontrado is None:
                 nuevo_tema = Tema(tema_actual, [])
                 nuevo_tema.agregar_id_objeto(self._id)
-                print(nuevo_tema.objetos)
                 nuevo_tema.guardar()
             else:
                 tema_existente = Tema(id_mongo=encontrado['_id'])
-                print(tema_existente.__dict__)
                 if str(self._id) not in [str(id_objeto) for id_objeto in tema_existente.objetos]:
                     tema_existente.agregar_id_objeto(self._id)
                     tema_existente.actualizar()
@@ -99,6 +97,13 @@ class ObjetoDeAprendizaje:
         for objeto_id in objetos_encontrados:
             lista_objetos_finales.append(ObjetoDeAprendizaje(dict_mongo=mongoDB.ObjetosDeAprendizaje.find_one({'_id': objeto_id})))
         return lista_objetos_finales
+
+    @staticmethod
+    def buscar_objetos_de_usuario(_id: str, **kwargs) -> 'list[ObjetoDeAprendizaje]':
+        if 'serializar' in kwargs:
+            if kwargs['serializar'] == True:
+                return [ObjetoDeAprendizaje(dict_mongo=dict_objeto).serializar_para_tabla() for dict_objeto in mongoDB.ObjetosDeAprendizaje.find({'autor': ObjectId(_id)})]
+        return [ObjetoDeAprendizaje(dict_mongo=dict_objeto) for dict_objeto in mongoDB.ObjetosDeAprendizaje.find({'autor': ObjectId(_id)})]
 
     def serializar_para_tabla(self):
         objeto = {
