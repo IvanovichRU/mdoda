@@ -1,9 +1,10 @@
 import json
-from bson.objectid import ObjectId
 from django.http.response import HttpResponse, JsonResponse
 from manejador.Colecciones.Usuario import Usuario
 from manejador.Colecciones.ObjetoDeAprendizaje import ObjetoDeAprendizaje
 from django.template import loader
+from django.core.files.storage import FileSystemStorage
+from mdoda.settings import BASE_DIR
 
 # Create your views here.
 def vista_login(request):
@@ -35,6 +36,8 @@ def vista_login(request):
                 token_sesion = None
             respuesta = JsonResponse({'Usuario': dict_a_enviar, 'token_sesion': token_sesion})
             return respuesta
+        else:
+            return JsonResponse({'Mensaje': 'Contraseña incorrecta.'})
 
 def buscar_objetos(request):
     encontrados = ObjetoDeAprendizaje.buscar(request.GET['cadena_de_busqueda'])
@@ -42,10 +45,12 @@ def buscar_objetos(request):
     return JsonResponse({'objetos_encontrados': encontrados_serializables})
 
 def registrar_objeto(request):
-    datos = json.loads(request.body)
-    datos['autor'] = ObjectId(datos['autor'])
-    objeto = ObjetoDeAprendizaje(dict_mongo=datos)
-    objeto.guardar()
+    archivo_zip = request.FILES['zip']
+    almacenamiento = FileSystemStorage(location=BASE_DIR / 'objetos/')
+    archivo = almacenamiento.save(archivo_zip.name, archivo_zip)
+    datos = json.loads(request.POST['datos'])
+    datos['url'] = almacenamiento.path(archivo)
+    ObjetoDeAprendizaje(dict_mongo=datos).guardar()
     return JsonResponse({'Mensaje': "Exito"})
 
 def nuevo_usuario(request):
@@ -53,7 +58,6 @@ def nuevo_usuario(request):
     usuario_nuevo = Usuario(datos)
     usuario_nuevo.guardar()
     return JsonResponse({'Mensaje': 'Nuevo usuario creado.'})
-
 
 def arreglar_csrf(request):
     plantilla=loader.get_template("manejador/arreglar_csrf.html")
@@ -63,8 +67,13 @@ def arreglar_csrf(request):
 
 def obtener_objetos(request):
     datos = request.GET
-    objetos_del_usuario = ObjetoDeAprendizaje.buscar_objetos_de_usuario(datos['usuario_id'], serializar=True)
-    return JsonResponse({'objetos_encontrados': objetos_del_usuario})
+    objetos = Usuario(id_mongo=datos['usuario_id'], tipo=datos['tipo']).obtener_objetos()
+    return JsonResponse({'objetos_encontrados': objetos})
+
+def obtener_info_objeto(request):
+    datos = request.GET
+    objeto = ObjetoDeAprendizaje(id_mongo=datos['_id'])
+    return JsonResponse({'Objeto': objeto.serializar_info()})
 
 def refrescar_usuario(request):
     datos = request.GET

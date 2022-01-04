@@ -32,15 +32,18 @@ class ObjetoDeAprendizaje:
     temas: 'list[str]'
     autor: Usuario
     materiales: 'list[Material]'
+    url: str
 
     def __init__(
         self, nombre=None, nivel=None,
         granularidad=None, perfil=None,
         objetivo_de_aprendizaje=None, descripcion=None,
         temas=None, autor=None, materiales=None, **kwargs) -> None:
-
         if 'dict_mongo' in kwargs:
             self.__dict__ = kwargs['dict_mongo']
+            self.autor = {'_id': ObjectId(self.autor['_id']), 'tipo': self.autor['tipo']}
+        elif 'id_mongo' in kwargs:
+            self.__dict__ = mongoDB.ObjetosDeAprendizaje.find_one({'_id': ObjectId(kwargs['id_mongo'])})
         else:
             self._id = None
             self.nombre = nombre
@@ -52,6 +55,7 @@ class ObjetoDeAprendizaje:
             self.autor = autor
             self.materiales = materiales
             self.descripcion = descripcion
+            self.url = kwargs['url'] if 'url' in kwargs else None
     
     def guardar(self):
         dict_para_mongo = self.__dict__
@@ -71,6 +75,22 @@ class ObjetoDeAprendizaje:
     def actualizar(self, dict_cambios: dict):
         dict_nuevo = mongoDB.ObjetosDeAprendizaje.replace_one({'_id': self._id}, dict_cambios)
         self.__dict__ = dict_nuevo
+
+    def serializar_para_tabla(self):
+        objeto = {
+            '_id': str(self._id),
+            'nombre': self.nombre,
+            'descripcion': self.descripcion,
+            'temas': self.temas
+        }
+        return objeto
+
+    def serializar_info(self) -> dict:
+        '''Serializar la información del objeto para mostrar en el frontend.'''
+        dict_serializado = self.__dict__
+        dict_serializado['_id'] = str(dict_serializado['_id'])
+        dict_serializado['autor']['_id'] = str(self.autor['_id'])
+        return dict_serializado
 
     @staticmethod
     def buscar(cadena_busqueda: str):
@@ -97,19 +117,3 @@ class ObjetoDeAprendizaje:
         for objeto_id in objetos_encontrados:
             lista_objetos_finales.append(ObjetoDeAprendizaje(dict_mongo=mongoDB.ObjetosDeAprendizaje.find_one({'_id': objeto_id})))
         return lista_objetos_finales
-
-    @staticmethod
-    def buscar_objetos_de_usuario(_id: str, **kwargs) -> 'list[ObjetoDeAprendizaje]':
-        if 'serializar' in kwargs:
-            if kwargs['serializar'] == True:
-                return [ObjetoDeAprendizaje(dict_mongo=dict_objeto).serializar_para_tabla() for dict_objeto in mongoDB.ObjetosDeAprendizaje.find({'autor': ObjectId(_id)})]
-        return [ObjetoDeAprendizaje(dict_mongo=dict_objeto) for dict_objeto in mongoDB.ObjetosDeAprendizaje.find({'autor': ObjectId(_id)})]
-
-    def serializar_para_tabla(self):
-        objeto = {
-            'id': str(self._id),
-            'nombre': self.nombre,
-            'descripcion': self.descripcion,
-            'temas': self.temas
-        }
-        return objeto

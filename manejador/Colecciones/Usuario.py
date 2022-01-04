@@ -23,7 +23,7 @@ class Usuario:
         '''
         if 'id_mongo' in kwargs and 'tipo' in kwargs:
             if kwargs['tipo'] == 'Administrador':
-                self.__dict__ = mongoDB.Administradores.find_one({'_id':ObjectId(kwargs['id_mongo'])})
+                self.__dict__ = mongoDB.Administradores.find_one({'_id': ObjectId(kwargs['id_mongo'])})
                 self.tipo = 'Administrador'
             elif kwargs['tipo'] == 'Maestro':
                 self.__dict__ = mongoDB.Maestros.find_one({'_id':ObjectId(kwargs['id_mongo'])})
@@ -68,6 +68,13 @@ class Usuario:
 
     def crear_sesion(self) -> ObjectId:
         return mongoDB.Sesiones.insert_one({'usuario': self._id, 'tipo': self.tipo}).inserted_id
+
+    def obtener_objetos(self):
+        objetos_encontrados = [objeto for objeto in mongoDB.ObjetosDeAprendizaje.find({'autor': {'_id': self._id, 'tipo': self.tipo}})]
+        for objeto in objetos_encontrados:
+            objeto['_id'] = str(objeto['_id'])
+            objeto['autor']['_id'] = str(objeto['autor']['_id'])
+        return objetos_encontrados
 
     @staticmethod
     def buscar(**kwargs) -> 'list[Usuario] | Usuario | None':
