@@ -75,6 +75,20 @@ def obtener_info_objeto(request):
     objeto = ObjetoDeAprendizaje(id_mongo=datos['_id'])
     return JsonResponse({'Objeto': objeto.serializar_info()})
 
+def descargar_objeto(request):
+    datos = request.GET
+    url_objeto = ObjetoDeAprendizaje(id_mongo=datos['_id']).url
+    # return JsonResponse({'Mensaje': 'Exito'})
+    try:
+        with open(url_objeto, 'rb') as f:
+            archivo_zip = f.read()
+            return HttpResponse(archivo_zip, headers={
+                'Content-Type': 'application/zip',
+                'Content-Disposition': 'attachment; filename="Objeto.zip"'
+            })
+    except IOError:
+        return JsonResponse({'Mensaje': 'Error'})
+
 def refrescar_usuario(request):
     datos = request.GET
     dict_a_enviar = Usuario(id_mongo=datos['usuario_id'], tipo=datos['tipo']).__dict__
