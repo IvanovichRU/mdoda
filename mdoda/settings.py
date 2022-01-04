@@ -132,7 +132,8 @@ MONGO_URI = 'mongodb+srv://MDODA:PIOLIN@cluster0.zekiv.mongodb.net/BaseDeConocim
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000',
     'http://23.99.198.110:3000',
-    'http://23.99.198.110'
+    'http://23.99.198.110',
+    'http://localhost'
 ]
 
 CSRF_TRUSTED_ORIGINS = ['http://localhost:3000']
