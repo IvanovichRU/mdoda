@@ -44,12 +44,12 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware'
+    'django.middleware.clickjacking.XFrameOpionsMiddleware'
 ]
 
 ROOT_URLCONF = 'mdoda.urls'
@@ -129,12 +129,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MONGO_URI = 'mongodb+srv://MDODA:PIOLIN@cluster0.zekiv.mongodb.net/BaseDeConocimientos?retryWrites=true&w=majority'
 
-CORS_ORIGIN_WHITELIST = [
-    'http://localhost:3000',
-    'http://23.99.198.110:3000',
-    'http://23.99.198.110',
-    'http://localhost'
-]
+# CORS_ORIGIN_WHITELIST = [
+#     'http://localhost:3000',
+#     'http://23.99.198.110:3000',
+#     'http://23.99.198.110',
+#     'http://localhost'
+# ]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 CSRF_TRUSTED_ORIGINS = ['http://localhost:3000']
 CSRF_USE_SESSIONS = False
